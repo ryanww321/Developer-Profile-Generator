@@ -1,68 +1,56 @@
-// const questions = [
-
-// ];
-
-// function writeToFile(fileName, data) {
-// }
-
-// function init() {
-
-// }
-
-// init();
-
 const fs = require("fs");
 const inquirer = require("inquirer");
 const util = require("util");
+const axios = require("axios");
 
 const writeFileAsync = util.promisify(fs.writeFile);
-// ask the user questions and returns answers
-function promptUser() {
-    return inquirer.prompt([
 
-        {
-            type: "input",
-            name: "name",
-            message: "What is your name?"
-        },
-        {
-            type: "checkbox",
-            message: "What languages do you know?",
-            name: "stack",
-            choices: [
-                "HTML",
-                "CSS",
-                "JavaScript",
-                "MySQL"
-            ]
-        },
-        {
-            type: "list",
-            message: "What is your preferred method of communication?",
-            name: "contact",
-            choices: [
-                "email",
-                "phone",
-                "telekinesis"
-            ]
-        }
-    ]);
-}
-// inserts the answers into new html
-function generateHTML(answers) {
-    // return `paste in html here ${answers.what's in the quotes}`
-}
-// starts entire app
-async function init() {
+getData();
+
+async function getData(data) {
+
+    let questions = [{
+        type: "input",
+        name: "username",
+        message: "What is your name?"
+    },
+    {
+        type: "input",
+        name: "title",
+        message: "What is your repo's title?"
+    },
+    {
+        type: "input",
+        name: "description",
+        message: "What is your repo's description?"
+    },
+    {
+        type: "input",
+        name: "tableOfContents",
+        message: "What is your table of contents?"
+    },
+    {
+        type: "input",
+        name: "installation",
+        message: "How do you install?"
+    }]
+    
     try {
-        const userAnswers = await promptUser();
-        const newHTML = generateHTML(userAnswers);
-        await writeFileAsync("index.html", newHTML);
-        console.log("Successfully created the file!");
-    }
-    catch (err) {
-        console.log(err)
+        const {username, title, description, tableOfContents, installation}  = await inquirer.prompt(questions);
+
+        let {data} = await axios.get(`https://api.github.com/users/${username}`)
+        
+        await writeFileAsync("readme1.md",  `
+        ## GitHub Username: ${username}
+        ## Email: ${data.email}
+        ## Bio Image: ${data.avatar_url}
+        ## Repo Title: ${title}
+        ## Repo Description: ${description}
+        ## Table of Contents: ${tableOfContents}
+        ## Installation: ${installation}
+        `)
+
+    } catch (err) {
+        console.log(err);
     }
 }
-
-init();
